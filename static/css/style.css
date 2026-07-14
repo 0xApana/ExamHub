@@ -1,0 +1,145 @@
+body{
+    background-color:#f4f6f9;
+    font-family:Arial, sans-serif;
+    margin:40px;
+}
+
+h1{
+    color:#1d4ed8;
+    text-align:center;
+}
+
+h2{
+    color:#374151;
+}
+
+p{
+    color:#4b5563;
+    line-height:1.6;
+}
+
+.container{
+    width:80%;
+    max-width:900px;
+    margin:auto;
+}
+
+/* Header */
+
+header{
+    background-color:#1d4ed8;
+    color:white;
+    padding:20px 25px;   /* Slight horizontal breathing space */
+}
+
+header a{
+    color:white;
+}
+
+header a:hover{
+    color:#dbeafe;
+}
+
+/* Navigation */
+
+nav{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+nav ul{
+    list-style:none;
+    padding:0;
+    margin:0;            /* Remove browser default margin */
+}
+
+nav li{
+    display:inline;
+    margin-right:20px;
+}
+
+nav a{
+    text-decoration:none;
+    color:#1d4ed8;
+    font-weight:bold;
+    margin-right:10px;
+    transition:color .3s ease;
+}
+
+nav a:hover{
+    color:#2563eb;
+}
+
+/* Buttons */
+
+.btn{
+    display:inline-block;
+    background-color:#1d4ed8;
+    color:white;
+    padding:12px 24px;
+    border:1px solid #1d4ed8;   /* Better than a black border */
+    border-radius:8px;
+    margin-top:20px;
+    text-decoration:none;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.btn:hover{
+    background-color:#2563eb;
+    border-color:#2563eb;
+}
+
+button{
+    background-color:#1d4ed8;
+    color:white;
+    padding:10px 20px;
+    border:none;
+    border-radius:5px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+    box-shadow:0 4px 10px rgba(0,0,0,.2);
+}
+
+button:hover{
+    background-color:#2563eb;
+}
+
+/* Forms */
+
+input{
+    width:300px;
+    padding:10px;
+    margin-top:5px;
+    margin-bottom:15px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:15px;
+}
+
+/* Images */
+
+img{
+    max-width:100%;
+    height:auto;
+}
+
+/* Mobile */
+
+@media (max-width:768px){
+
+    body{
+        margin:20px;
+    }
+
+    .container{
+        width:95%;
+    }
+
+    input{
+        width:100%;
+        box-sizing:border-box;
+    }
+}
