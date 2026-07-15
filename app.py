@@ -12,10 +12,13 @@ def about():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        matric = request.form["matric"]
-        password = request.form["password"]
+        matric = request.form.get("matric")
+        password = request.form.get("password")
 
-        return f"Matric: {matric} <br> Password: {password}"
+        if matric == "2024/1/95339CP" and password == "12345":
+            return "Login Successful!"
+        return "Invalid Matric Number or Password."
+
     return render_template("login.html")
 
 @app.route("/contact")
