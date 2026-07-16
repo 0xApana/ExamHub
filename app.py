@@ -1,6 +1,8 @@
-from flask import Flask, render_template,request, redirect, url_for
+from flask import Flask, render_template,request, redirect, url_for,  flash
 
 app= Flask(__name__)
+app.secret_key = "examhub_secret_key"
+
 @app.route("/")
 def Home():
     return render_template("index.html")
@@ -17,8 +19,8 @@ def login():
 
         if matric == "2024/1/95339CP" and password == "12345":
             return redirect(url_for("dashboard"))
-        return "Invalid Matric Number or Password."
-
+        flash("Invalid Matric Number or Password.")       
+        return redirect(url_for("login"))
     return render_template("login.html")
 
 @app.route("/contact")
