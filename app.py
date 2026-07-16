@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request, redirect, url_for,  flash
+from flask import Flask, render_template,request, redirect, url_for,  flash, session
 
 app= Flask(__name__)
 app.secret_key = "examhub_secret_key"
@@ -18,9 +18,14 @@ def login():
         password = request.form.get("password")
 
         if matric == "2024/1/95339CP" and password == "12345":
+
+            session["student"] = matric
+
             return redirect(url_for("dashboard"))
-        flash("Invalid Matric Number or Password.")       
-        return redirect(url_for("login"))
+        else:
+
+         flash("Invalid Matric Number or Password.")       
+         return redirect(url_for("login"))
     return render_template("login.html")
 
 @app.route("/contact")
@@ -33,7 +38,20 @@ def student(name):
 
 @app.route("/dashboard")
 def dashboard():
-    return "<h1>Welcome to your Dashboard!</h1>"
+    
+    if "student" not in session:
+        flash("Please login first.")
+        return redirect(url_for("login"))
+    
+    return f"Welcome {session['student']}!"
+
+@app.route("/logout")
+def logout():
+    session.pop("student",None)
+    flash("logout successful.")
+    return redirect(url_for("login"))
+    
+
 
 if __name__ == "__main__":
     app.run(debug=True)
