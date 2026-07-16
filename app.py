@@ -1,4 +1,4 @@
-from flask import Flask, render_template,request
+from flask import Flask, render_template,request, redirect, url_for
 
 app= Flask(__name__)
 @app.route("/")
@@ -16,7 +16,7 @@ def login():
         password = request.form.get("password")
 
         if matric == "2024/1/95339CP" and password == "12345":
-            return "Login Successful!"
+            return redirect(url_for("dashboard"))
         return "Invalid Matric Number or Password."
 
     return render_template("login.html")
@@ -29,6 +29,9 @@ def contact():
 def student(name):
     return f"Welcome, {name}!"
 
+@app.route("/dashboard")
+def dashboard():
+    return "<h1>Welcome to your Dashboard!</h1>"
 
 if __name__ == "__main__":
     app.run(debug=True)
