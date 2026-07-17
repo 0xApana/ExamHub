@@ -1,4 +1,5 @@
 from flask import Flask, render_template,request, redirect, url_for,  flash, session
+from database import get_db_connection
 
 app= Flask(__name__)
 app.secret_key = "examhub_secret_key"
@@ -17,16 +18,29 @@ def login():
         matric = request.form.get("matric")
         password = request.form.get("password")
 
-        if matric == "2024/1/95339CP" and password == "12345":
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
-            session["student"] = matric
+        cursor.execute("""
+        SELECT *
+        FROM students
+        WHERE matric_number = ?
+        AND password = ?
+        """, (matric, password))
 
+        student = cursor.fetchone()
+
+        if student:
+            session["student"] = student["full_name"]
+            connection.close()
             return redirect(url_for("dashboard"))
-        else:
 
-         flash("Invalid Matric Number or Password.")       
-         return redirect(url_for("login"))
+        connection.close()
+        flash("Invalid Matric Number or Password.")
+        return redirect(url_for("login"))
+    
     return render_template("login.html")
+    
 
 @app.route("/contact")
 def contact():
