@@ -5,8 +5,12 @@ app= Flask(__name__)
 app.secret_key = "examhub_secret_key"
 
 @app.route("/")
-def Home():
+def home():
     return render_template("index.html")
+
+# @app.route("/home")
+# def home():
+#     return render_template(url_for("Home"))
 
 @app.route("/about")
 def about():
@@ -31,7 +35,7 @@ def login():
         student = cursor.fetchone()
 
         if student:
-            session["student"] = student["full_name"]
+            session["student_id"] = student["id"]
             connection.close()
             return redirect(url_for("dashboard"))
 
@@ -52,12 +56,27 @@ def student(name):
 
 @app.route("/dashboard")
 def dashboard():
-    
-    if "student" not in session:
+
+    if "student_id" not in session:
         flash("Please login first.")
         return redirect(url_for("login"))
-    
-    return f"Welcome {session['student']}!"
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT * FROM students WHERE id = ?",
+        (session["student_id"],)
+    )
+
+    student = cursor.fetchone()
+
+    connection.close()
+
+    return render_template(
+        "dashboard.html",
+        student=student
+    )
 
 @app.route("/logout")
 def logout():
