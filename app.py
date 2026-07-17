@@ -78,6 +78,28 @@ def dashboard():
         student=student
     )
 
+@app.route("/exam")
+def exam():
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT *
+    FROM questions
+    WHERE course = ?               
+    LIMIT 1
+    """, ("Applied Electricity II",))
+
+    question = cursor.fetchone()
+
+    connection.close()
+
+    return render_template(
+        "exam.html",
+        question=question
+    )
+
 @app.route("/logout")
 def logout():
     session.pop("student",None)
