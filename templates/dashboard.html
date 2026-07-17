@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ExamHub</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<header>
+
+<h1>ExamHub Dashboard</h1>
+
+<nav>
+
+<a href="{{ url_for('logout') }}">
+Logout
+</a>
+
+</nav>
+
+</header>
+
+<main class="container">
+
+<h2>Welcome, {{ student["full_name"] }} 👋</h2>
+
+<p><strong>Student ID:</strong> {{ student["student_id"] }}</p>
+
+<p><strong>Matric Number:</strong> {{ student["matric_number"] }}</p>
+<p>
+You have successfully logged into ExamHub.
+</p>
+
+<h3>Available Exams</h3>
+
+<ul>
+
+<li>Applied Electricity ∣</li>
+
+<li>Applied Electricity ∣∣</li>
+<li>Materials Science</li>
+
+<li>Fluid Mechanics</li>
+
+<li>Engineering Mathematics ∣</li>
+
+<li>Engineering Mathematics ∣∣</li>
+
+</ul>
+
+<a href="#" class="btn">
+Start Examination
+</a>
+
+</main>
+
+</body>
+</html>

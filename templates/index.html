@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExamHub</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet"  href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 <header>
@@ -14,9 +14,10 @@
     <p>Welcome to the Computer-Based Test Management System.</p>
     <p>This platform allows students and administrators to take examinations online securely and efficiently.</p>
     <nav class="navbar">
-        <a href="/about">About</a>
-        <a href="/login">Login</a>
-        <a href="/contact">Contact</a>
+        <!-- <a href="{{ url_for('home') }}">Home</a> -->
+        <a href="{{url_for('about')}}">About</a>
+        <a href="{{url_for('login')}}">Login</a>
+        <a href="{{url_for('contact')}}">Contact</a>
     </nav>
 </header>    
 
