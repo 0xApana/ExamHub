@@ -23,6 +23,9 @@ def login():
         matric = request.form.get("matric")
         password = request.form.get("password")
 
+        print("Matric entered:", matric)
+        print("Password entered:", password)
+
         connection = get_db_connection()
         cursor = connection.cursor()
 
@@ -34,6 +37,20 @@ def login():
         """, (matric, password))
 
         student = cursor.fetchone()
+
+        cursor.execute("SELECT * FROM students")
+
+        print("Students in database:")
+
+        for row in cursor.fetchall():
+           print(dict(row))
+
+        cursor.execute("""
+        SELECT *
+        FROM students
+        WHERE matric_number = ?
+        AND password = ?
+        """, (matric, password))
 
         if student:
             session["student_id"] = student["id"]
@@ -74,7 +91,7 @@ def dashboard():
     cursor.execute("""
         SELECT 
               course,
-              COUNT(*)  AS total_questios
+              COUNT(*)  AS total_questions
         FROM questions
         GROUP BY course
         ORDER BY course                                         
