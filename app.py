@@ -1,5 +1,6 @@
 from flask import Flask, render_template,request, redirect, url_for,  flash, session
 from database import get_db_connection
+import random
 
 app= Flask(__name__)
 app.secret_key = "examhub_secret_key"
@@ -70,12 +71,20 @@ def dashboard():
     )
 
     student = cursor.fetchone()
+    cursor.execute("""
+        SELECT DISTINCT course
+        FROM questions
+        ORDER BY course
+""")
+
+    courses = cursor.fetchall()
 
     connection.close()
 
     return render_template(
         "dashboard.html",
-        student=student
+        student=student,
+        courses=courses
     )
 
 @app.route("/next")
@@ -171,6 +180,35 @@ def submit_exam():
         total=total_questions
     )
 
+@app.route("/start_exam")
+def start_exam():
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id
+        FROM questions
+        WHERE course = ?
+    """, ("Applied Electricity II",))
+
+    questions = cursor.fetchall()
+
+    connection.close()
+
+    # Convert Row objects into a list of IDs
+    question_ids = [question["id"] for question in questions]
+
+    # Randomly choose 20 questions
+    selected_questions = random.sample(question_ids, 20)
+
+    # Save exam state
+    session["exam_questions"] = selected_questions
+    session["current_question"] = 0
+    session["answers"] = {}
+
+    return redirect(url_for("exam"))
+
 @app.route("/exam")
 def exam():
 
@@ -186,8 +224,7 @@ def exam():
 
     questions = cursor.fetchall()
 
-    # print("Total questions:", len(questions))
-    # print("Current question index:", session.get("current_question"))
+    
 
     if request.args.get("new") == "1":
         session["current_question"] = 0

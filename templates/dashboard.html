@@ -40,20 +40,19 @@ You are ready to begin your examination.
 
 <ul>
 
-<!-- <li>Applied Electricity I</li> -->
+<ul>
 
-<li>Applied Electricity II</li>
-<li>Materials Science</li>
+{% for course in courses %}
 
-<li>Fluid Mechanics</li>
+    <li>{{ course["course"] }}</li>
 
-<li>Engineering Mathematics I</li>
-
-<li>Engineering Mathematics II</li>
+{% endfor %}
 
 </ul>
 
-<a href="{{ url_for('exam', new=1) }}" class="btn">
+</ul>
+
+<a href="{{ url_for('start_exam') }}" class="btn">
     Start Examination
 </a>
 
