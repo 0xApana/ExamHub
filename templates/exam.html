@@ -13,7 +13,12 @@
 
 <p>{{ question["question"] }}</p>
 
-<form>
+<form method="POST" action="{{ url_for('save_answer') }}">
+
+    <input
+        type="hidden"
+        name="question_id"
+        value="{{ question['id'] }}">
 
     <input type="radio" name="answer" value="A">
     {{ question["option_a"] }}
@@ -35,9 +40,17 @@
 
     <br><br>
 
-    <button type="submit">
-        Next
-    </button>
+    <div class="navigation">
+
+        <a href="{{ url_for('previous_question') }}" class="btn">
+            Previous
+        </a>
+
+        <button type="submit" class="btn">
+            Next
+        </button>
+
+    </div>
 
 </form>
 

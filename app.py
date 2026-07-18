@@ -78,9 +78,103 @@ def dashboard():
         student=student
     )
 
+@app.route("/next")
+def next_question():
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT COUNT(*) FROM questions
+    WHERE course = ?
+    """, ("Applied Electricity II",))
+
+    total_questions = cursor.fetchone()[0]
+
+    connection.close()
+
+    if session["current_question"] < total_questions - 1:
+        session["current_question"] += 1
+
+    return redirect(url_for("exam"))
+
+@app.route("/previous")
+def previous_question():
+
+    if session["current_question"] > 0:
+        session["current_question"] -= 1
+
+    return redirect(url_for("exam"))
+
+@app.route("/save_answer", methods=["POST"])
+def save_answer():
+
+    question_id = request.form.get("question_id")
+    answer = request.form.get("answer")
+
+    answers = session.get("answers", {})
+
+    answers[question_id] = answer
+
+    session["answers"] = answers
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT COUNT(*)
+    FROM questions
+    WHERE course = ?
+    """, ("Applied Electricity II",))
+
+    total_questions = cursor.fetchone()[0]
+
+    connection.close()
+
+    if session["current_question"] < total_questions - 1:
+        session["current_question"] += 1
+
+        return redirect(url_for("exam"))
+
+    return redirect(url_for("submit_exam"))
+
+@app.route("/submit_exam")
+def submit_exam():
+
+    answers = session.get("answers", {})
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    score = 0
+
+    for question_id, student_answer in answers.items():
+
+        cursor.execute("""
+        SELECT correct_answer
+        FROM questions
+        WHERE id = ?
+        """, (question_id,))
+
+        question = cursor.fetchone()
+
+        if question and student_answer == question["correct_answer"]:
+            score += 1
+
+    total_questions = len(answers)
+
+    connection.close()
+
+    return render_template(
+        "result.html",
+        score=score,
+        total=total_questions
+    )
+
 @app.route("/exam")
 def exam():
 
+    
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -88,10 +182,24 @@ def exam():
     SELECT *
     FROM questions
     WHERE course = ?               
-    LIMIT 1
     """, ("Applied Electricity II",))
 
-    question = cursor.fetchone()
+    questions = cursor.fetchall()
+
+    # print("Total questions:", len(questions))
+    # print("Current question index:", session.get("current_question"))
+
+    if request.args.get("new") == "1":
+        session["current_question"] = 0
+        session["answers"] = {}
+
+    if "current_question" not in session:
+        session["current_question"] = 0
+
+    if "answers" not in session:
+        session["answers"] = {}
+    
+    question = questions[session["current_question"]]
 
     connection.close()
 
