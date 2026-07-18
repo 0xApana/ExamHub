@@ -204,9 +204,13 @@ def exam():
     connection.close()
 
     return render_template(
-        "exam.html",
-        question=question
-    )
+    "exam.html",
+    question=question,
+    current=session["current_question"] + 1,
+    total=len(questions),
+    is_last=(session["current_question"] == len(questions) - 1),
+    selected_answer=session.get("answers", {}).get(str(question["id"]))
+)
 
 @app.route("/logout")
 def logout():

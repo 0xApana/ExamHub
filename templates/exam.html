@@ -6,10 +6,16 @@
 <body>
 
 <h1>ExamHub Examination</h1>
+<h3>
+    Time Left:
+    <span id="timer">20:00</span>
+</h3>
 
 <h2>{{ question["course"] }}</h2>
 
-<p><strong>Question:</strong></p>
+<h3>
+Question {{ current }} of {{ total }}
+</h3>
 
 <p>{{ question["question"] }}</p>
 
@@ -20,39 +26,93 @@
         name="question_id"
         value="{{ question['id'] }}">
 
-    <input type="radio" name="answer" value="A">
+    <input type="radio"
+       name="answer"
+       value="A"
+       {% if selected_answer == "A" %}checked{% endif %}>
     {{ question["option_a"] }}
 
     <br><br>
 
-    <input type="radio" name="answer" value="B">
+    <input type="radio"
+       name="answer"
+       value="B"
+       {% if selected_answer == "B" %}checked{% endif %}>
     {{ question["option_b"] }}
 
     <br><br>
 
-    <input type="radio" name="answer" value="C">
+    <input type="radio"
+       name="answer"
+       value="C"
+       {% if selected_answer == "C" %}checked{% endif %}>
     {{ question["option_c"] }}
 
     <br><br>
 
-    <input type="radio" name="answer" value="D">
+    <input type="radio"
+       name="answer"
+       value="D"
+       {% if selected_answer == "D" %}checked{% endif %}>
     {{ question["option_d"] }}
 
     <br><br>
 
+    
     <div class="navigation">
 
-        <a href="{{ url_for('previous_question') }}" class="btn">
-            Previous
-        </a>
+    <a href="{{ url_for('previous_question') }}" class="btn">
+        Previous
+    </a>
+
+    {% if is_last %}
+
+        <button type="submit" class="btn">
+            Finish Exam
+        </button>
+
+    {% else %}
 
         <button type="submit" class="btn">
             Next
         </button>
 
-    </div>
+    {% endif %}
+
+</div>
 
 </form>
+
+
+<script>
+
+let timeLeft = 30 * 60;
+
+const timer = document.getElementById("timer");
+
+const countdown = setInterval(function () {
+
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    timer.innerHTML =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+    if (timeLeft <= 0) {
+
+        clearInterval(countdown);
+
+        window.location.href = "{{ url_for('submit_exam') }}";
+
+    }
+
+    timeLeft--;
+
+}, 1000);
+
+</script>
 
 </body>
 </html>

@@ -3,58 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExamHub</title>
-    <link rel="stylesheet"  href="{{ url_for('static', filename='css/style.css') }}">
+    <title>ExamHub | Computer-Based Testing Platform</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-<header>
-    <h1>ExamHub</h1>
-    
-    <h3>Welcome to ExamHub</h3>
-    <p>Welcome to the Computer-Based Test Management System.</p>
-    <p>This platform allows students and administrators to take examinations online securely and efficiently.</p>
-    <nav class="navbar">
-        <!-- <a href="{{ url_for('home') }}">Home</a> -->
-        <a href="{{url_for('about')}}">About</a>
-        <a href="{{url_for('login')}}">Login</a>
-        <a href="{{url_for('contact')}}">Contact</a>
-    </nav>
-</header>    
 
-<main class="container">
-    <a href="/login" class="btn">Get Started</a>
+    <!-- ================= Header ================= -->
 
-    <h2>Features</h2>
-<ul>
-    <li>
-        <strong>Secure Login</strong>
-        <p>Only authorized users can access the platform.</p>
-    </li>
-    <li>
-        <strong>Timed Examinations</strong>
-        <p>Automatic countdown timer for every examinations.</p>
-    </li>
-    <li>
-        <strong>Instant Results</strong>
-        <p>Students can view their results immediately after submission.</p>
-    </li>
-    <li>
-        <strong>Mobile Friendly</strong>
-        <p>Access the CBT portal from phones,tablets,or computers.</p>
-    </li>
-</ul>
-</main>
-    <hr>
-<footer>
-<p> © 2026 ExamHub</p>
-    <hr>
-    <nav>
-        <ul>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-            <li><a href="terms.html">Terms</a></li>
-            <li><a href="contact.html">Contact</a></li>
-        </ul>
-    </nav>
-</footer>    
+    <header>
+
+        <h1>ExamHub</h1>
+
+        <nav class="navbar">
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </nav>
+
+    </header>
+
+    <!-- ================= Hero ================= -->
+
+    <main class="container">
+
+        <section class="hero">
+
+            <h2>Welcome to ExamHub</h2>
+
+            <p>
+                A secure and modern Computer-Based Testing platform
+                designed to help students take examinations quickly,
+                safely, and efficiently.
+            </p>
+
+            <a href="{{ url_for('login') }}" class="btn">
+                Get Started
+            </a>
+
+        </section>
+
+        <!-- ================= Features ================= -->
+
+        <section>
+
+            <h2>Features</h2>
+
+            <ul>
+
+                <li>
+                    <strong>🔐 Secure Login</strong>
+
+                    <p>
+                        Only authorized students can access
+                        examinations using their credentials.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>⏱ Timed Examinations</strong>
+
+                    <p>
+                        Built-in countdown timer automatically
+                        submits the exam when time expires.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>📊 Instant Results</strong>
+
+                    <p>
+                        View your score immediately after
+                        completing the examination.
+                    </p>
+                </li>
+
+                <li>
+                    <strong>📱 Responsive Design</strong>
+
+                    <p>
+                        Works seamlessly on desktop,
+                        tablet, and mobile devices.
+                    </p>
+                </li>
+
+            </ul>
+
+        </section>
+
+    </main>
+
+    <!-- ================= Footer ================= -->
+
+    <footer>
+
+        <p>
+            &copy; 2026 ExamHub. All rights reserved.
+        </p>
+
+        <p>
+            Built with Flask, SQLite and ❤️ by the ExamHub Team.
+        </p>
+
+    </footer>
+
 </body>
 </html>
