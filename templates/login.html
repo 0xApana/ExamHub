@@ -1,68 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login-ExamHub</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+
+    <title>Login | ExamHub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
-<body>
-<header>
-    <h1>ExamHub</h1>
-    <h2>Student Login</h2>
-    <nav>
-        <ul>
-            <li><a href="{{url_for('home')}}">Home</a></li>
-            <li><a href="{{url_for('about')}}">About</a></li>
-            <li><a href="{{url_for('contact')}}">Contact</a></li>
-        </ul>
-    </nav>
-</header>
-<main class="container">
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul>
+
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+
+<div class="w-full max-w-md">
+
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+
+        <div class="text-center mb-8">
+
+            <h1 class="text-3xl font-bold text-slate-900">
+                ExamHub
+            </h1>
+
+            <p class="text-gray-500 mt-2">
+                Student Login
+            </p>
+
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+
             {% for message in messages %}
-                <li>{{ message }}</li>
+
+            <div class="mb-4 rounded-lg bg-red-100 border border-red-300 text-red-700 px-4 py-3">
+
+                {{ message }}
+
+            </div>
+
             {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
-  <form method="post">
 
-     <label for="matric">Matric Number</label>
-     <input
-        type="text"
-        id="matric"
-        name="matric"
-        placeholder="Enter your matric number"
-        required
-     >
+        {% endif %}
+        {% endwith %}
 
-    <br><br>
+        <form method="POST">
 
-    <label for="password">Password</label>
-    <input
-        type="password"
-        id="password"
-        name="password"
-        placeholder="Enter your password"
-        required
-    >
+            <div class="mb-5">
 
-    <br><br>
+                <label class="block mb-2 font-medium text-gray-700">
+                    Matric Number
+                </label>
 
-    <button type="submit">
-        Login
-    </button>
+                <input
+                    type="text"
+                    name="matric"
+                    required
+                    class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600">
 
-  </form>
-  <p>Please enter your matric number and password to access your examination dashboard.</p>
-</main>
-<hr>
-<footer>
-<p>© 2026 ExamHub</p>
+            </div>
 
-</footer>
+            <div class="mb-6">
+
+                <label class="block mb-2 font-medium text-gray-700">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    name="password"
+                    required
+                    class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600">
+
+            </div>
+
+            <button
+                type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+
+                Login
+
+            </button>
+
+        </form>
+
+        <div class="text-center mt-6">
+
+            <a href="{{ url_for('home') }}"
+               class="text-blue-600 hover:underline">
+
+                ← Back to Home
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
 </body>
 </html>

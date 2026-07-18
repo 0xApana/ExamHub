@@ -1,88 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ExamHub - Examination</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Exam | ExamHub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
-<body>
 
-<h1>ExamHub Examination</h1>
-<h3>
-    Time Left:
-    <span id="timer">20:00</span>
-</h3>
+<body class="bg-slate-100 min-h-screen">
 
-<h2>{{ question["course"] }}</h2>
+<header class="bg-slate-900 shadow">
 
-<h3>
-Question {{ current }} of {{ total }}
-</h3>
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-8 py-5">
 
-<p>{{ question["question"] }}</p>
+        <h1 class="text-3xl font-bold text-white">
+            ExamHub
+        </h1>
 
-<form method="POST" action="{{ url_for('save_answer') }}">
+        <a href="{{ url_for('logout') }}"
+           class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition">
 
-    <input
-        type="hidden"
-        name="question_id"
-        value="{{ question['id'] }}">
+            Logout
 
-    <input type="radio"
-       name="answer"
-       value="A"
-       {% if selected_answer == "A" %}checked{% endif %}>
-    {{ question["option_a"] }}
+        </a>
 
-    <br><br>
+    </div>
 
-    <input type="radio"
-       name="answer"
-       value="B"
-       {% if selected_answer == "B" %}checked{% endif %}>
-    {{ question["option_b"] }}
+</header>
 
-    <br><br>
+<main class="max-w-5xl mx-auto py-10 px-6">
 
-    <input type="radio"
-       name="answer"
-       value="C"
-       {% if selected_answer == "C" %}checked{% endif %}>
-    {{ question["option_c"] }}
+    <!-- Top Information -->
 
-    <br><br>
+    <div class="flex flex-col md:flex-row justify-between gap-6 mb-8">
 
-    <input type="radio"
-       name="answer"
-       value="D"
-       {% if selected_answer == "D" %}checked{% endif %}>
-    {{ question["option_d"] }}
+        <div>
 
-    <br><br>
+            <h2 class="text-3xl font-bold text-slate-800">
 
-    
-    <div class="navigation">
+                {{ question["course"] }}
 
-    <a href="{{ url_for('previous_question') }}" class="btn">
-        Previous
-    </a>
+            </h2>
 
-    {% if is_last %}
+            <p class="text-gray-500 mt-1">
 
-        <button type="submit" class="btn">
-            Finish Exam
-        </button>
+                Question {{ current }} of {{ total }}
 
-    {% else %}
+            </p>
 
-        <button type="submit" class="btn">
-            Next
-        </button>
+        </div>
 
-    {% endif %}
+        <div class="bg-blue-600 text-white px-6 py-4 rounded-xl shadow-lg text-center">
 
-</div>
+            <p class="text-sm uppercase tracking-wide">
 
-</form>
+                Time Left
 
+            </p>
+
+            <p id="timer" class="text-3xl font-bold">
+
+                30:00
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Progress -->
+
+    <div class="mb-8">
+
+        <div class="w-full h-3 bg-gray-300 rounded-full overflow-hidden">
+
+            <div
+                class="bg-blue-600 h-full"
+                data-progress="{{ (current / total) * 100 }}">
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Question Card -->
+
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+
+        <h3 class="text-xl font-bold text-slate-800 mb-6">
+
+            Question {{ current }}
+
+        </h3>
+
+        <p class="text-lg leading-8 text-gray-700 mb-8">
+
+            {{ question["question"] }}
+
+        </p>
+
+        <form method="POST" action="{{ url_for('save_answer') }}">
+
+            <input
+                type="hidden"
+                name="question_id"
+                value="{{ question['id'] }}">
+
+            <div class="space-y-4">
+
+                <label class="flex items-center gap-4 border rounded-xl p-5 hover:bg-blue-50 cursor-pointer transition">
+
+                    <input
+                        type="radio"
+                        name="answer"
+                        value="A"
+                        {% if selected_answer=="A" %}checked{% endif %}>
+
+                    {{ question["option_a"] }}
+
+                </label>
+
+                <label class="flex items-center gap-4 border rounded-xl p-5 hover:bg-blue-50 cursor-pointer transition">
+
+                    <input
+                        type="radio"
+                        name="answer"
+                        value="B"
+                        {% if selected_answer=="B" %}checked{% endif %}>
+
+                    {{ question["option_b"] }}
+
+                </label>
+
+                <label class="flex items-center gap-4 border rounded-xl p-5 hover:bg-blue-50 cursor-pointer transition">
+
+                    <input
+                        type="radio"
+                        name="answer"
+                        value="C"
+                        {% if selected_answer=="C" %}checked{% endif %}>
+
+                    {{ question["option_c"] }}
+
+                </label>
+
+                <label class="flex items-center gap-4 border rounded-xl p-5 hover:bg-blue-50 cursor-pointer transition">
+
+                    <input
+                        type="radio"
+                        name="answer"
+                        value="D"
+                        {% if selected_answer=="D" %}checked{% endif %}>
+
+                    {{ question["option_d"] }}
+
+                </label>
+
+            </div>
+
+            <div class="flex justify-between mt-10">
+
+                <a href="{{ url_for('previous_question') }}"
+                   class="bg-gray-300 hover:bg-gray-400 px-6 py-3 rounded-xl font-semibold">
+
+                    ← Previous
+
+                </a>
+
+                {% if is_last %}
+
+                <button
+                    type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold">
+
+                    Finish Exam
+
+                </button>
+
+                {% else %}
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold">
+
+                    Next →
+
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
 
 <script>
 
@@ -90,27 +207,27 @@ let timeLeft = 30 * 60;
 
 const timer = document.getElementById("timer");
 
-const countdown = setInterval(function () {
+const countdown = setInterval(function(){
 
     let minutes = Math.floor(timeLeft / 60);
     let seconds = timeLeft % 60;
 
     timer.innerHTML =
-        String(minutes).padStart(2, "0") +
+        String(minutes).padStart(2,"0") +
         ":" +
-        String(seconds).padStart(2, "0");
+        String(seconds).padStart(2,"0");
 
-    if (timeLeft <= 0) {
+    if(timeLeft <= 0){
 
         clearInterval(countdown);
 
-        window.location.href = "{{ url_for('submit_exam') }}";
+        window.location.href="{{ url_for('submit_exam') }}";
 
     }
 
     timeLeft--;
 
-}, 1000);
+},1000);
 
 </script>
 

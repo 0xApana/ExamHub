@@ -1,60 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ExamHub</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Dashboard | ExamHub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
-<body>
+<body class="bg-slate-100">
 
-<header>
+<header class="bg-slate-900 text-white shadow">
 
-<h1>ExamHub Dashboard</h1>
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
 
-<nav>
+        <h1 class="text-3xl font-bold">
+            ExamHub
+        </h1>
 
-<a href="{{ url_for('logout') }}">
-Logout
-</a>
+        <a href="{{ url_for('logout') }}"
+           class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition">
 
-</nav>
+            Logout
+
+        </a>
+
+    </div>
 
 </header>
 
-<main class="container">
+<main class="max-w-5xl mx-auto py-10 px-6">
 
-<h2>Welcome, {{ student["full_name"] }} 👋</h2>
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
 
-<p><strong>Student ID:</strong> {{ student["student_id"] }}</p>
+        <h2 class="text-3xl font-bold text-slate-800">
 
-<p><strong>Matric Number:</strong> {{ student["matric_number"] }}</p>
-<p>
-You are ready to begin your examination.
-</p>
+            Welcome,
 
-<h3>Available Exams</h3>
+            {{ student["fullname"] }}
 
-<ul>
+        </h2>
 
-<ul>
+        <p class="text-gray-500 mt-2">
 
-{% for course in courses %}
+            Select a course and the number of questions to begin your examination.
 
-    <li>{{ course["course"] }}</li>
+        </p>
 
-{% endfor %}
+    </div>
 
-</ul>
+    <form
+        action="{{ url_for('start_exam') }}"
+        method="POST"
+        class="bg-white rounded-2xl shadow-lg p-8">
 
-</ul>
+        <h3 class="text-2xl font-bold mb-6">
 
-<a href="{{ url_for('start_exam') }}" class="btn">
-    Start Examination
-</a>
+            Available Courses
+
+        </h3>
+
+        <div class="space-y-4">
+
+            {% for course in courses %}
+
+            <label class="flex justify-between items-center border rounded-xl p-4 cursor-pointer hover:bg-blue-50 hover:border-blue-500 transition">
+
+                <div class="flex items-center gap-3">
+
+                    <input
+                        type="radio"
+                        name="course"
+                        value="{{ course['course'] }}"
+                        required>
+
+                    <span class="font-medium">
+
+                        {{ course["course"] }}
+
+                    </span>
+
+                </div>
+
+                <span class="text-sm text-gray-500">
+
+                    {{ course["total_questions"] }} Questions
+
+                </span>
+
+            </label>
+
+            {% endfor %}
+
+        </div>
+
+        <hr class="my-8">
+
+        <h3 class="text-2xl font-bold mb-6">
+
+            Questions to Attempt
+
+        </h3>
+
+        <div class="grid grid-cols-3 gap-4">
+
+            <label class="border rounded-xl p-5 text-center cursor-pointer hover:bg-blue-50">
+
+                <input
+                    type="radio"
+                    name="exam_size"
+                    value="10"
+                    required>
+
+                <div class="mt-2 font-semibold">
+
+                    10 Questions
+
+                </div>
+
+            </label>
+
+            <label class="border rounded-xl p-5 text-center cursor-pointer hover:bg-blue-50">
+
+                <input
+                    type="radio"
+                    name="exam_size"
+                    value="20">
+
+                <div class="mt-2 font-semibold">
+
+                    20 Questions
+
+                </div>
+
+            </label>
+
+            <label class="border rounded-xl p-5 text-center cursor-pointer hover:bg-blue-50">
+
+                <input
+                    type="radio"
+                    name="exam_size"
+                    value="40">
+
+                <div class="mt-2 font-semibold">
+
+                    40 Questions
+
+                </div>
+
+            </label>
+
+        </div>
+
+        <button
+            class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold transition">
+
+            Start Examination
+
+        </button>
+
+    </form>
 
 </main>
 

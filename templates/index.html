@@ -3,110 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExamHub | Computer-Based Testing Platform</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <title>ExamHub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
 
-    <!-- ================= Header ================= -->
+<body class="bg-slate-100">
 
-    <header>
+<header class="bg-slate-900 text-white shadow">
 
-        <h1>ExamHub</h1>
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
 
-        <nav class="navbar">
-            <a href="{{ url_for('about') }}">About</a>
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-        </nav>
+        <h1 class="text-3xl font-bold">
+            ExamHub
+        </h1>
 
-    </header>
+        <nav class="flex gap-8 text-sm font-medium">
 
-    <!-- ================= Hero ================= -->
-
-    <main class="container">
-
-        <section class="hero">
-
-            <h2>Welcome to ExamHub</h2>
-
-            <p>
-                A secure and modern Computer-Based Testing platform
-                designed to help students take examinations quickly,
-                safely, and efficiently.
-            </p>
-
-            <a href="{{ url_for('login') }}" class="btn">
-                Get Started
+            <a href="{{ url_for('about') }}" class="hover:text-blue-400">
+                About
             </a>
 
-        </section>
+            <a href="{{ url_for('login') }}" class="hover:text-blue-400">
+                Login
+            </a>
 
-        <!-- ================= Features ================= -->
+            <a href="{{ url_for('contact') }}" class="hover:text-blue-400">
+                Contact
+            </a>
 
-        <section>
+        </nav>
 
-            <h2>Features</h2>
+    </div>
 
-            <ul>
+</header>
 
-                <li>
-                    <strong>🔐 Secure Login</strong>
+<section class="max-w-6xl mx-auto px-6 py-24 text-center">
 
-                    <p>
-                        Only authorized students can access
-                        examinations using their credentials.
-                    </p>
-                </li>
+    <h2 class="text-5xl font-extrabold text-slate-900 mb-6">
 
-                <li>
-                    <strong>⏱ Timed Examinations</strong>
+        Modern Computer-Based
+        <span class="text-blue-600">Testing Platform</span>
 
-                    <p>
-                        Built-in countdown timer automatically
-                        submits the exam when time expires.
-                    </p>
-                </li>
+    </h2>
 
-                <li>
-                    <strong>📊 Instant Results</strong>
+    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
 
-                    <p>
-                        View your score immediately after
-                        completing the examination.
-                    </p>
-                </li>
+        ExamHub enables students to take secure online examinations with
+        automatic scoring, randomized questions, and instant feedback.
 
-                <li>
-                    <strong>📱 Responsive Design</strong>
+    </p>
 
-                    <p>
-                        Works seamlessly on desktop,
-                        tablet, and mobile devices.
-                    </p>
-                </li>
+    <a href="{{ url_for('login') }}"
+       class="inline-block mt-10 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition">
 
-            </ul>
+        Get Started →
 
-        </section>
+    </a>
 
-    </main>
+</section>
 
-    <!-- ================= Footer ================= -->
+<section class="max-w-6xl mx-auto px-6 pb-24">
 
-    <footer>
+    <h3 class="text-3xl font-bold text-center mb-12">
+
+        Features
+
+    </h3>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <div class="bg-white rounded-2xl shadow p-8">
+
+            <h4 class="font-bold text-xl mb-3">
+
+                🔒 Secure Login
+
+            </h4>
+
+            <p class="text-gray-600">
+
+                Only authenticated students can access examinations.
+
+            </p>
+
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-8">
+
+            <h4 class="font-bold text-xl mb-3">
+
+                ⏱ Timed Exams
+
+            </h4>
+
+            <p class="text-gray-600">
+
+                Automatic countdown timer with auto submission.
+
+            </p>
+
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-8">
+
+            <h4 class="font-bold text-xl mb-3">
+
+                📊 Instant Results
+
+            </h4>
+
+            <p class="text-gray-600">
+
+                View your score immediately after completing an exam.
+
+            </p>
+
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-8">
+
+            <h4 class="font-bold text-xl mb-3">
+
+                📱 Responsive
+
+            </h4>
+
+            <p class="text-gray-600">
+
+                Works seamlessly on laptops, tablets and mobile phones.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<footer class="bg-slate-900 text-white">
+
+    <div class="max-w-7xl mx-auto px-6 py-8 flex justify-between items-center">
 
         <p>
-            &copy; 2026 ExamHub. All rights reserved.
+
+            © 2026 ExamHub
+
         </p>
 
-        <p>
-            Built with Flask, SQLite and ❤️ by the ExamHub Team.
-        </p>
+        <div class="flex gap-8">
 
-    </footer>
+            <a href="#" class="hover:text-blue-400">
+
+                Privacy
+
+            </a>
+
+            <a href="#" class="hover:text-blue-400">
+
+                Terms
+
+            </a>
+
+            <a href="{{ url_for('contact') }}" class="hover:text-blue-400">
+
+                Contact
+
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
 
 </body>
 </html>

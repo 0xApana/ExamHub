@@ -72,9 +72,12 @@ def dashboard():
 
     student = cursor.fetchone()
     cursor.execute("""
-        SELECT DISTINCT course
+        SELECT 
+              course,
+              COUNT(*)  AS total_questios
         FROM questions
-        ORDER BY course
+        GROUP BY course
+        ORDER BY course                                         
 """)
 
     courses = cursor.fetchall()
@@ -87,6 +90,40 @@ def dashboard():
         courses=courses
     )
 
+@app.route("/start_exam", methods=["POST"])
+def start_exam():
+
+    session["selected_course"] = request.form["course"]
+    session["exam_size"] = int(request.form["exam_size"])
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id
+        FROM questions
+        WHERE course = ?
+    """, (session["selected_course"],))
+
+    question_ids = [row["id"] for row in cursor.fetchall()]
+
+    connection.close()
+
+    import random
+
+    if session["exam_size"] > len(question_ids):
+        session["exam_size"] = len(question_ids)
+
+    session["exam_questions"] = random.sample(
+        question_ids,
+        session["exam_size"]
+    )
+
+    session["current_question"] = 0
+    session["answers"] = {}
+
+    return redirect(url_for("exam"))
+
 @app.route("/next")
 def next_question():
 
@@ -96,7 +133,7 @@ def next_question():
     cursor.execute("""
     SELECT COUNT(*) FROM questions
     WHERE course = ?
-    """, ("Applied Electricity II",))
+    """, (session["selected_course"],))
 
     total_questions = cursor.fetchone()[0]
 
@@ -127,18 +164,7 @@ def save_answer():
 
     session["answers"] = answers
 
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-    SELECT COUNT(*)
-    FROM questions
-    WHERE course = ?
-    """, ("Applied Electricity II",))
-
-    total_questions = cursor.fetchone()[0]
-
-    connection.close()
+    total_questions = len(session["exam_questions"])
 
     if session["current_question"] < total_questions - 1:
         session["current_question"] += 1
@@ -180,34 +206,7 @@ def submit_exam():
         total=total_questions
     )
 
-@app.route("/start_exam")
-def start_exam():
 
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        SELECT id
-        FROM questions
-        WHERE course = ?
-    """, ("Applied Electricity II",))
-
-    questions = cursor.fetchall()
-
-    connection.close()
-
-    # Convert Row objects into a list of IDs
-    question_ids = [question["id"] for question in questions]
-
-    # Randomly choose 20 questions
-    selected_questions = random.sample(question_ids, 20)
-
-    # Save exam state
-    session["exam_questions"] = selected_questions
-    session["current_question"] = 0
-    session["answers"] = {}
-
-    return redirect(url_for("exam"))
 
 @app.route("/exam")
 def exam():
@@ -219,10 +218,18 @@ def exam():
     cursor.execute("""
     SELECT *
     FROM questions
-    WHERE course = ?               
-    """, ("Applied Electricity II",))
+    WHERE course = ?
+    ORDER BY id
+    """, (session["selected_course"],))
 
-    questions = cursor.fetchall()
+    all_questions = cursor.fetchall()
+
+    selected_ids = session["exam_questions"]
+
+    questions = [
+      q for q in all_questions
+      if q["id"] in selected_ids
+]
 
     
 
