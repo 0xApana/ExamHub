@@ -1,6 +1,7 @@
 from flask import Flask, render_template,request, redirect, url_for,  flash, session
 from database import get_db_connection
 import random
+import time 
 
 app= Flask(__name__)
 app.secret_key = "examhub_secret_key"
@@ -139,6 +140,10 @@ def start_exam():
     session["current_question"] = 0
     session["answers"] = {}
 
+    session["exam_start_time"] = int(time.time())
+    session["exam_duration"] = 20 * 60   # 20 minutes
+    
+
     return redirect(url_for("exam"))
 
 @app.route("/next")
@@ -166,6 +171,16 @@ def previous_question():
 
     if session["current_question"] > 0:
         session["current_question"] -= 1
+
+    return redirect(url_for("exam"))
+
+@app.route("/goto_question/<int:index>")
+def goto_question(index):
+
+    total = len(session["exam_questions"])
+
+    if 0 <= index < total:
+        session["current_question"] = index
 
     return redirect(url_for("exam"))
 
@@ -264,13 +279,35 @@ def exam():
 
     connection.close()
 
+    current_time = int(time.time())
+
+    elapsed_time = current_time - session["exam_start_time"]
+
+    remaining_time = session["exam_duration"] - elapsed_time
+
+    if remaining_time <= 0:
+       return redirect(url_for("submit_exam"))
+    
+    total = len(session["exam_questions"])
+    question_ids = session["exam_questions"]
+    question_ids=question_ids
+
+    answered = len(session.get("answers", {}))
+
+    unanswered = total - answered
+
     return render_template(
     "exam.html",
     question=question,
     current=session["current_question"] + 1,
     total=len(questions),
     is_last=(session["current_question"] == len(questions) - 1),
-    selected_answer=session.get("answers", {}).get(str(question["id"]))
+    selected_answer=session.get("answers", {}).get(str(question["id"])),
+    remaining_time=remaining_time,
+    question_numbers=range(total),
+    # question_numbers=range(total),
+    question_ids=question_ids,
+    unanswered=unanswered
 )
 
 @app.route("/logout")

@@ -62,7 +62,7 @@
 
             </p>
 
-            <p id="timer" class="text-3xl font-bold">
+            <p id="timer" class="text-3xl font-bold" data-remaining-time="{{ remaining_time }}">
 
                 30:00
 
@@ -86,6 +86,38 @@
         </div>
 
     </div>
+
+    <div class="mb-6">
+    <h3 class="text-lg font-semibold mb-3">Question Palette</h3>
+
+    <div class="grid grid-cols-5 gap-2">
+
+        {% for i in question_numbers %}
+
+            <a href="{{ url_for('goto_question', index=i) }}"
+               class="
+               text-center
+               py-2
+               rounded
+               border
+               {% if i == session['current_question'] %}
+                    bg-blue-600 text-white
+                    {% elif session.get("answers", {}).get(question_ids[i]|string) %}
+
+                    bg-green-500 text-white
+               {% else %}
+                    bg-gray-200
+               {% endif %}
+               ">
+
+                {{ i + 1 }}
+
+            </a>
+
+        {% endfor %}
+
+    </div>
+</div>
 
     <!-- Question Card -->
 
@@ -174,9 +206,11 @@
                 {% if is_last %}
 
                 <button
+                    id="finish-btn"
                     type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold">
-
+                    class="btn"
+                    data-unanswered="{{ unanswered }}"
+                    onclick="return confirmFinish()">
                     Finish Exam
 
                 </button>
@@ -203,9 +237,8 @@
 
 <script>
 
-let timeLeft = 30 * 60;
-
 const timer = document.getElementById("timer");
+let timeLeft = Number(timer.dataset.remainingTime || 0);
 
 const countdown = setInterval(function(){
 
@@ -228,6 +261,27 @@ const countdown = setInterval(function(){
     timeLeft--;
 
 },1000);
+
+function confirmFinish() {
+
+    const finishButton = document.getElementById("finish-btn");
+    const unanswered = Number(finishButton.dataset.unanswered || 0);
+
+    if (unanswered > 0) {
+
+        return confirm(
+            "You still have " + unanswered +
+            " unanswered question(s).\n\nAre you sure you want to submit?"
+        );
+
+    }
+
+    return confirm(
+        "All questions have been answered.\n\nSubmit your exam?"
+    );
+
+}
+
 
 </script>
 

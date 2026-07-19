@@ -299,8 +299,7 @@ questions = [
         "option_c": "Frequency",
         "option_d": "Polarity",
         "correct_answer": "C"
-    }
-        ,
+    },
     {
         "course": "Applied Electricity II",
         "year": 2026,

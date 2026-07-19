@@ -1,16 +1,22 @@
 import sqlite3
-from question_bank.applied_electricity_ii import questions
+
+from question_bank.applied_electricity_ii import questions as ae_questions
+from question_bank.engineering_math_ii import questions as em_questions
 
 connection = sqlite3.connect("students.db")
 cursor = connection.cursor()
 
-# Optional: Clear existing Applied Electricity II questions
-cursor.execute(
-    "DELETE FROM questions WHERE course = ?",
-    ("Applied Electricity II",)
-)
 
-for q in questions:
+cursor.execute("DELETE FROM questions")
+
+connection.commit()
+
+
+all_questions = ae_questions + em_questions
+
+
+for q in all_questions:
+
     cursor.execute("""
         INSERT INTO questions (
             course,
@@ -37,4 +43,4 @@ for q in questions:
 connection.commit()
 connection.close()
 
-print(f"✅ {len(questions)} questions inserted successfully!")
+print(f"✅ {len(all_questions)} questions inserted successfully!")
