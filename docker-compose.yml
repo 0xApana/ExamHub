@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  examhub:
+    build: .
+    container_name: examhub
+
+    ports:
+      - "5000:5000"
+
+    restart: unless-stopped
