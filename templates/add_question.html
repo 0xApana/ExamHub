@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100">
+
+<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow">
+
+    <h1 class="text-3xl font-bold mb-6">
+        Add Question
+    </h1>
+
+    <form method="POST">
+
+        <label>Course</label>
+        <select name="course" class="w-full border p-3 rounded mb-4" required>
+            <option value="Applied Electricity II">Applied Electricity II</option>
+            <option value="Engineering Mathematics II">Engineering Mathematics II</option>
+        </select>
+
+        <label>Year</label>
+        <input type="text" name="year" class="w-full border p-3 rounded mb-4" required>
+
+        <label>Question</label>
+        <textarea name="question" class="w-full border p-3 rounded mb-4" rows="4" required></textarea>
+
+        <label>Option A</label>
+        <input type="text" name="option_a" class="w-full border p-3 rounded mb-4" required>
+
+        <label>Option B</label>
+        <input type="text" name="option_b" class="w-full border p-3 rounded mb-4" required>
+
+        <label>Option C</label>
+        <input type="text" name="option_c" class="w-full border p-3 rounded mb-4" required>
+
+        <label>Option D</label>
+        <input type="text" name="option_d" class="w-full border p-3 rounded mb-4" required>
+
+        <label>Correct Answer</label>
+        <select name="correct_answer" class="w-full border p-3 rounded mb-6" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+
+        <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded">
+
+            Save Question
+
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

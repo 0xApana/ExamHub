@@ -35,6 +35,14 @@ CREATE TABLE IF NOT EXISTS questions(
 )
 """)
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS admins(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+""")
+
 connection.commit()
 
 print("Database initialized successfully!")

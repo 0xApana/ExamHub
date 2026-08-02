@@ -310,6 +310,165 @@ def exam():
     unanswered=unanswered
 )
 
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT *
+            FROM admins
+            WHERE username = ?
+            AND password = ?
+        """, (username, password))
+
+        admin = cursor.fetchone()
+
+        connection.close()
+
+        if admin:
+
+            session["admin_id"] = admin["id"]
+
+            return redirect(url_for("admin_dashboard"))
+
+        flash("Invalid username or password.")
+
+    return render_template("admin_login.html")
+
+@app.route("/admin/dashboard")
+def admin_dashboard():
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS total FROM students")
+    total_students = cursor.fetchone()["total"]
+
+    cursor.execute("SELECT COUNT(*) AS total FROM questions")
+    total_questions = cursor.fetchone()["total"]
+
+    cursor.execute("""
+        SELECT COUNT(DISTINCT course) AS total
+        FROM questions
+    """)
+    total_courses = cursor.fetchone()["total"]
+
+    # We'll create this table later
+    total_results = 0
+
+    connection.close()
+
+    return render_template(
+        "admin_dashboard.html",
+        total_students=total_students,
+        total_questions=total_questions,
+        total_courses=total_courses,
+        total_results=total_results
+    )
+
+
+@app.route("/admin/questions")
+def admin_questions():
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM questions
+        ORDER BY course, year
+    """)
+
+    questions = cursor.fetchall()
+
+    connection.close()
+
+    return render_template(
+        "admin_questions.html",
+        questions=questions
+    )
+
+@app.route("/admin/questions/delete/<int:question_id>", methods=["POST"])
+def delete_question(question_id):
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "DELETE FROM questions WHERE id = ?",
+        (question_id,)
+    )
+
+    connection.commit()
+    connection.close()
+
+    flash("Question deleted successfully.")
+
+    return redirect(url_for("admin_questions"))
+
+
+@app.route("/admin/questions/add", methods=["GET", "POST"])
+def add_question():
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    if request.method == "POST":
+
+        connection = get_db_connection()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT INTO questions(
+                course,
+                year,
+                question,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                correct_answer
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            request.form["course"],
+            request.form["year"],
+            request.form["question"],
+            request.form["option_a"],
+            request.form["option_b"],
+            request.form["option_c"],
+            request.form["option_d"],
+            request.form["correct_answer"]
+        ))
+
+        connection.commit()
+        connection.close()
+
+        flash("Question added successfully!")
+
+        return redirect(url_for("admin_questions"))
+
+    return render_template("add_question.html")
+
+@app.route("/admin/questions/edit/<int:question_id>", methods=["GET","POST"])
+
 @app.route("/logout")
 def logout():
     session.pop("student",None)

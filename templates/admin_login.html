@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | ExamHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 flex items-center justify-center min-h-screen">
+
+<div class="bg-white shadow-xl rounded-2xl p-10 w-full max-w-md">
+
+    <h1 class="text-3xl font-bold text-center mb-8">
+        Admin Login
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <div class="mb-5">
+            <label class="block mb-2 font-semibold">
+                Username
+            </label>
+
+            <input
+                type="text"
+                name="username"
+                required
+                class="w-full border rounded-lg px-4 py-3">
+        </div>
+
+        <div class="mb-6">
+            <label class="block mb-2 font-semibold">
+                Password
+            </label>
+
+            <input
+                type="password"
+                name="password"
+                required
+                class="w-full border rounded-lg px-4 py-3">
+        </div>
+
+        <button
+            class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg">
+
+            Login
+
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
