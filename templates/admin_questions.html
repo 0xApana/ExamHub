@@ -1,40 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends "base_admin.html" %}
 
-<title>Manage Questions</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-</head>
-
-<body class="bg-slate-100">
-
-<div class="max-w-7xl mx-auto py-10">
-
-<h1 class="text-4xl font-bold mb-8">
-
+{% block title %}
 Manage Questions
+{% endblock %}
 
-</h1>
-
-{% with messages = get_flashed_messages() %}
-
-{% if messages %}
-
-<div class="bg-green-100 text-green-700 p-4 rounded mb-6">
-
-{{ messages[0] }}
-
-</div>
-
-{% endif %}
-
-{% endwith %}
+{% block content %}
 
 <div class="flex justify-between items-center mb-6">
 
-   
+    <h1 class="text-4xl font-bold">
+        Manage Questions
+    </h1>
 
     <a
         href="{{ url_for('add_question') }}"
@@ -46,75 +22,76 @@ Manage Questions
 
 </div>
 
-<table class="w-full bg-white shadow rounded">
+<table class="w-full bg-white shadow rounded-lg overflow-hidden">
 
-<thead class="bg-slate-900 text-white">
+    <thead class="bg-slate-900 text-white">
 
-<tr>
+        <tr>
 
-<th class="p-3">Course</th>
+            <th class="p-3 text-left">Course</th>
+            <th class="p-3 text-left">Year</th>
+            <th class="p-3 text-left">Question</th>
+            <th class="p-3 text-center">Action</th>
 
-<th class="p-3">Year</th>
+        </tr>
 
-<th class="p-3">Question</th>
+    </thead>
 
-<th class="p-3">Action</th>
+    <tbody>
 
-</tr>
+    {% for question in questions %}
 
-</thead>
+        <tr class="border-b">
 
-<tbody>
+            <td class="p-3">
+                {{ question["course"] }}
+            </td>
 
-{% for question in questions %}
+            <td class="p-3">
+                {{ question["year"] }}
+            </td>
 
-<tr class="border-b">
+            <td class="p-3">
+                {{ question["question"][:70] }}...
+            </td>
 
-<td class="p-3">
+            <td class="p-3">
 
-{{ question["course"] }}
+                <div class="flex gap-2 justify-center">
 
-</td>
+                    <a
+                        href="#"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
 
-<td class="p-3">
+                        Edit
 
-{{ question["year"] }}
+                    </a>
 
-</td>
+                    <form
+                        method="POST"
+                        action="{{ url_for('delete_question', question_id=question['id']) }}"
+                        onsubmit="return confirmDelete();">
 
-<td class="p-3">
+                        <button
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
 
-{{ question["question"][:70] }}...
+                            Delete
 
-</td>
+                        </button>
 
-<td class="p-3">
+                    </form>
 
-<form
-method="POST"
-action="{{ url_for('delete_question', question_id=question['id']) }}"
-onsubmit="return confirmDelete();">
+                </div>
 
-<button
-class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+            </td>
 
-Delete
+        </tr>
 
-</button>
+    {% endfor %}
 
-</form>
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
+    </tbody>
 
 </table>
-
-</div>
 
 <script>
 
@@ -127,5 +104,5 @@ function confirmDelete(){
 }
 
 </script>
-</body>
-</html>
+
+{% endblock %}
