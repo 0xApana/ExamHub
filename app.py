@@ -465,9 +465,68 @@ def add_question():
 
         return redirect(url_for("admin_questions"))
 
-    return render_template("add_question.html")
+    return render_template(
+    "question_form.html",
+    question=None
+    )
 
-@app.route("/admin/questions/edit/<int:question_id>", methods=["GET","POST"])
+@app.route("/admin/questions/edit/<int:question_id>", methods=["GET", "POST"])
+def edit_question(question_id):
+
+    if "admin_id" not in session:
+        return redirect(url_for("admin_login"))
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    if request.method == "POST":
+
+        cursor.execute("""
+            UPDATE questions
+            SET
+                course=?,
+                year=?,
+                question=?,
+                option_a=?,
+                option_b=?,
+                option_c=?,
+                option_d=?,
+                correct_answer=?
+            WHERE id=?
+        """, (
+
+            request.form["course"],
+            request.form["year"],
+            request.form["question"],
+            request.form["option_a"],
+            request.form["option_b"],
+            request.form["option_c"],
+            request.form["option_d"],
+            request.form["correct_answer"],
+            question_id
+
+        ))
+
+        connection.commit()
+        connection.close()
+
+        flash("Question updated successfully!")
+
+        return redirect(url_for("admin_questions"))
+
+    cursor.execute(
+        "SELECT * FROM questions WHERE id=?",
+        (question_id,)
+    )
+
+    question = cursor.fetchone()
+
+    connection.close()
+
+    return render_template(
+        "question_form.html",
+        question=question
+    )
 
 @app.route("/logout")
 def logout():
