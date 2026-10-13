@@ -1,17 +1,15 @@
+
 """Provision the first ExamHub administrator for a newly initialized database.
 
-Run from the project directory after `python init_db.py`.
+Run after `python init_db.py`.
 Never use this script to reset an existing administrator's password.
 """
 
 import getpass
 import sqlite3
-from pathlib import Path
 
+from database import DATABASE
 from werkzeug.security import generate_password_hash
-
-
-DATABASE = Path(__file__).resolve().parent / "students.db"
 
 
 def main():
@@ -20,12 +18,18 @@ def main():
 
     with sqlite3.connect(DATABASE) as connection:
         try:
-            count = connection.execute("SELECT COUNT(*) FROM admins").fetchone()[0]
+            count = connection.execute(
+                "SELECT COUNT(*) FROM admins"
+            ).fetchone()[0]
         except sqlite3.OperationalError as exc:
-            raise SystemExit("Admins table missing. Run `python init_db.py` first.") from exc
+            raise SystemExit(
+                "Admins table missing. Run `python init_db.py` first."
+            ) from exc
 
         if count:
-            raise SystemExit("An administrator already exists. No changes made.")
+            raise SystemExit(
+                "An administrator already exists. No changes made."
+            )
 
         username = input("New admin username: ").strip()
         if not username:
@@ -33,10 +37,14 @@ def main():
 
         password = getpass.getpass("New admin password: ")
         confirmation = getpass.getpass("Confirm admin password: ")
+
         if password != confirmation:
             raise SystemExit("Passwords do not match. No changes made.")
+
         if len(password) < 12:
-            raise SystemExit("Use a password of at least 12 characters. No changes made.")
+            raise SystemExit(
+                "Use a password of at least 12 characters. No changes made."
+            )
 
         connection.execute(
             "INSERT INTO admins (username, password) VALUES (?, ?)",
