@@ -1,2 +1,27 @@
+# Python
 __pycache__/
-.pyc
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+.examhub_secret_key
+
+# Local databases and backups
+*.db
+*.db.backup
+*.db.before-auth
+*.sqlite
+*.sqlite3
+
+# Local backups
+*.before-auth
+*.bak
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db

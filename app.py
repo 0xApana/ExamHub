@@ -1,10 +1,64 @@
-from flask import Flask, render_template,request, redirect, url_for,  flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
 from database import get_db_connection
 import random
-import time 
+import time
+import os
+import secrets
+from datetime import timedelta
+from functools import wraps
+from pathlib import Path
+from werkzeug.security import check_password_hash
+
 
 app= Flask(__name__)
-app.secret_key = "examhub_secret_key"
+# Set EXAMHUB_SECRET_KEY in production. Local development uses a persistent,
+# untracked key file so restarting Flask does not invalidate every session.
+secret = os.environ.get("EXAMHUB_SECRET_KEY")
+if not secret:
+    key_file = Path(__file__).resolve().parent / ".examhub_secret_key"
+    if key_file.exists():
+        secret = key_file.read_text(encoding="utf-8").strip()
+    else:
+        secret = secrets.token_hex(32)
+        key_file.write_text(secret, encoding="utf-8")
+app.secret_key = secret
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("EXAMHUB_HTTPS") == "1",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
+)
+
+
+def student_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "student_id" not in session:
+            flash("Please log in first.")
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "admin_id" not in session:
+            return redirect(url_for("admin_login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def active_exam_required(view):
+    @wraps(view)
+    @student_required
+    def wrapped(*args, **kwargs):
+        if not session.get("exam_questions") or "exam_start_time" not in session:
+            flash("Start an exam from your dashboard.")
+            return redirect(url_for("dashboard"))
+        return view(*args, **kwargs)
+    return wrapped
+
 
 @app.route("/")
 def home():
@@ -21,49 +75,24 @@ def about():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        matric = request.form.get("matric")
-        password = request.form.get("password")
-
-        print("Matric entered:", matric)
-        print("Password entered:", password)
-
+        matric = (request.form.get("matric") or "").strip()
+        password = request.form.get("password") or ""
         connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-        SELECT *
-        FROM students
-        WHERE matric_number = ?
-        AND password = ?
-        """, (matric, password))
-
-        student = cursor.fetchone()
-
-        cursor.execute("SELECT * FROM students")
-
-        print("Students in database:")
-
-        for row in cursor.fetchall():
-           print(dict(row))
-
-        cursor.execute("""
-        SELECT *
-        FROM students
-        WHERE matric_number = ?
-        AND password = ?
-        """, (matric, password))
-
-        if student:
-            session["student_id"] = student["id"]
+        try:
+            student = connection.execute(
+                "SELECT id, password FROM students WHERE matric_number = ?", (matric,)
+            ).fetchone()
+        finally:
             connection.close()
+        if student and check_password_hash(student["password"], password):
+            session.clear()
+            session.permanent = True
+            session["student_id"] = student["id"]
             return redirect(url_for("dashboard"))
-
-        connection.close()
-        flash("Invalid Matric Number or Password.")
+        flash("Invalid matric number or password.")
         return redirect(url_for("login"))
-    
     return render_template("login.html")
-    
+
 
 @app.route("/contact")
 def contact():
@@ -74,6 +103,7 @@ def student(name):
     return f"Welcome, {name}!"
 
 @app.route("/dashboard")
+@student_required
 def dashboard():
 
     if "student_id" not in session:
@@ -109,10 +139,17 @@ def dashboard():
     )
 
 @app.route("/start_exam", methods=["POST"])
+@student_required
 def start_exam():
 
     session["selected_course"] = request.form["course"]
-    session["exam_size"] = int(request.form["exam_size"])
+    try:
+        exam_size = int(request.form.get("exam_size", ""))
+    except (ValueError, TypeError):
+        abort(400)
+    if exam_size < 1:
+        abort(400)
+    session["exam_size"] = exam_size
 
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -147,6 +184,7 @@ def start_exam():
     return redirect(url_for("exam"))
 
 @app.route("/next")
+@active_exam_required
 def next_question():
 
     connection = get_db_connection()
@@ -161,12 +199,13 @@ def next_question():
 
     connection.close()
 
-    if session["current_question"] < total_questions - 1:
+    if session["current_question"] < len(session["exam_questions"]) - 1:
         session["current_question"] += 1
 
     return redirect(url_for("exam"))
 
 @app.route("/previous")
+@active_exam_required
 def previous_question():
 
     if session["current_question"] > 0:
@@ -175,6 +214,7 @@ def previous_question():
     return redirect(url_for("exam"))
 
 @app.route("/goto_question/<int:index>")
+@active_exam_required
 def goto_question(index):
 
     total = len(session["exam_questions"])
@@ -185,6 +225,7 @@ def goto_question(index):
     return redirect(url_for("exam"))
 
 @app.route("/save_answer", methods=["POST"])
+@active_exam_required
 def save_answer():
 
     question_id = request.form.get("question_id")
@@ -198,7 +239,7 @@ def save_answer():
 
     total_questions = len(session["exam_questions"])
 
-    if session["current_question"] < total_questions - 1:
+    if session["current_question"] < len(session["exam_questions"]) - 1:
         session["current_question"] += 1
 
         return redirect(url_for("exam"))
@@ -206,6 +247,7 @@ def save_answer():
     return redirect(url_for("submit_exam"))
 
 @app.route("/submit_exam")
+@active_exam_required
 def submit_exam():
 
     answers = session.get("answers", {})
@@ -228,7 +270,7 @@ def submit_exam():
         if question and student_answer == question["correct_answer"]:
             score += 1
 
-    total_questions = len(answers)
+    total_questions = len(session["exam_questions"])
 
     connection.close()
 
@@ -241,6 +283,7 @@ def submit_exam():
 
 
 @app.route("/exam")
+@active_exam_required
 def exam():
 
     
@@ -275,6 +318,11 @@ def exam():
     if "answers" not in session:
         session["answers"] = {}
     
+    if not questions:
+        connection.close()
+        flash("This exam is no longer available.")
+        return redirect(url_for("dashboard"))
+    session["current_question"] = min(max(session["current_question"], 0), len(questions) - 1)
     question = questions[session["current_question"]]
 
     connection.close()
@@ -313,37 +361,27 @@ def exam():
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
-
     if request.method == "POST":
-
-        username = request.form["username"]
-        password = request.form["password"]
-
+        username = (request.form.get("username") or "").strip()
+        password = request.form.get("password") or ""
         connection = get_db_connection()
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT *
-            FROM admins
-            WHERE username = ?
-            AND password = ?
-        """, (username, password))
-
-        admin = cursor.fetchone()
-
-        connection.close()
-
-        if admin:
-
+        try:
+            admin = connection.execute(
+                "SELECT id, password FROM admins WHERE username = ?", (username,)
+            ).fetchone()
+        finally:
+            connection.close()
+        if admin and check_password_hash(admin["password"], password):
+            session.clear()
+            session.permanent = True
             session["admin_id"] = admin["id"]
-
             return redirect(url_for("admin_dashboard"))
-
         flash("Invalid username or password.")
-
     return render_template("admin_login.html")
 
+
 @app.route("/admin/dashboard")
+@admin_required
 def admin_dashboard():
 
     if "admin_id" not in session:
@@ -379,6 +417,7 @@ def admin_dashboard():
 
 
 @app.route("/admin/questions")
+@admin_required
 def admin_questions():
 
     if "admin_id" not in session:
@@ -403,6 +442,7 @@ def admin_questions():
     )
 
 @app.route("/admin/questions/delete/<int:question_id>", methods=["POST"])
+@admin_required
 def delete_question(question_id):
 
     if "admin_id" not in session:
@@ -425,6 +465,7 @@ def delete_question(question_id):
 
 
 @app.route("/admin/questions/add", methods=["GET", "POST"])
+@admin_required
 def add_question():
 
     if "admin_id" not in session:
@@ -471,6 +512,7 @@ def add_question():
     )
 
 @app.route("/admin/questions/edit/<int:question_id>", methods=["GET", "POST"])
+@admin_required
 def edit_question(question_id):
 
     if "admin_id" not in session:
@@ -530,7 +572,7 @@ def edit_question(question_id):
 
 @app.route("/logout")
 def logout():
-    session.pop("student",None)
+    session.clear()
     flash("logout successful.")
     return redirect(url_for("login"))
     
