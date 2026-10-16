@@ -9,7 +9,8 @@ from functools import wraps
 from pathlib import Path
 from werkzeug.security import check_password_hash
 from flask_wtf.csrf import CSRFProtect
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app= Flask(__name__)
 # Set EXAMHUB_SECRET_KEY in production. Local development uses a persistent,
@@ -33,6 +34,13 @@ app.config.update(
 
 csrf = CSRFProtect(app)
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri="memory://",
+)
+
 def student_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -41,6 +49,7 @@ def student_required(view):
             return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped
+
 
 
 def admin_required(view):
@@ -76,6 +85,7 @@ def about():
     return render_template("about.html")
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if request.method == "POST":
         matric = (request.form.get("matric") or "").strip()
@@ -365,6 +375,7 @@ def exam():
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def admin_login():
     if request.method == "POST":
         username = (request.form.get("username") or "").strip()
