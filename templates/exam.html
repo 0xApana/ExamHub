@@ -21,12 +21,11 @@
             ExamHub
         </h1>
 
-        <a href="{{ url_for('logout') }}"
-           class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition">
-
-            Logout
-
-        </a>
+        <form method="POST" action="{{ url_for('logout') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button type="submit"
+           class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition">Logout</button>
+</form>
 
     </div>
 
@@ -135,7 +134,8 @@
 
         </p>
 
-        <form method="POST" action="{{ url_for('save_answer') }}">
+        <form id="exam-answer-form" method="POST" action="{{ url_for('save_answer') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
             <input
                 type="hidden"
@@ -254,7 +254,9 @@ const countdown = setInterval(function(){
 
         clearInterval(countdown);
 
-        window.location.href="{{ url_for('submit_exam') }}";
+        const examForm = document.getElementById("exam-answer-form");
+        examForm.action = "{{ url_for('submit_exam') }}";
+        examForm.submit();
 
     }
 

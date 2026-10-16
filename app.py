@@ -8,6 +8,7 @@ from datetime import timedelta
 from functools import wraps
 from pathlib import Path
 from werkzeug.security import check_password_hash
+from flask_wtf.csrf import CSRFProtect
 
 
 app= Flask(__name__)
@@ -29,6 +30,8 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
 )
 
+
+csrf = CSRFProtect(app)
 
 def student_required(view):
     @wraps(view)
@@ -142,14 +145,13 @@ def dashboard():
 @student_required
 def start_exam():
 
-    session["selected_course"] = request.form["course"]
+    selected_course = (request.form.get("course") or "").strip()
     try:
         exam_size = int(request.form.get("exam_size", ""))
     except (ValueError, TypeError):
         abort(400)
     if exam_size < 1:
         abort(400)
-    session["exam_size"] = exam_size
 
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -158,27 +160,25 @@ def start_exam():
         SELECT id
         FROM questions
         WHERE course = ?
-    """, (session["selected_course"],))
+    """, (selected_course,))
 
     question_ids = [row["id"] for row in cursor.fetchall()]
 
     connection.close()
 
-    import random
+    if not question_ids:
+        flash("No questions are available for that course.")
+        return redirect(url_for("dashboard"))
 
-    if session["exam_size"] > len(question_ids):
-        session["exam_size"] = len(question_ids)
-
-    session["exam_questions"] = random.sample(
-        question_ids,
-        session["exam_size"]
-    )
+    session["selected_course"] = selected_course
+    session["exam_size"] = min(exam_size, len(question_ids))
+    session["exam_questions"] = random.sample(question_ids, session["exam_size"])
 
     session["current_question"] = 0
     session["answers"] = {}
 
     session["exam_start_time"] = int(time.time())
-    session["exam_duration"] = 20 * 60   # 20 minutes
+    session["exam_duration"] = 20*60   # 20*60 minutes
     
 
     return redirect(url_for("exam"))
@@ -224,62 +224,73 @@ def goto_question(index):
 
     return redirect(url_for("exam"))
 
+def exam_expired():
+    return time.time() >= session["exam_start_time"] + session["exam_duration"]
+
+
+def record_current_answer():
+    question_id = request.form.get("question_id", "")
+    answer = request.form.get("answer")
+    current_ids = session["exam_questions"]
+    current_index = session.get("current_question", 0)
+    if not (0 <= current_index < len(current_ids)):
+        abort(400)
+    if question_id != str(current_ids[current_index]):
+        abort(400)
+    if answer is not None and answer not in {"A", "B", "C", "D"}:
+        abort(400)
+    if answer is not None:
+        answers = dict(session.get("answers", {}))
+        answers[question_id] = answer
+        session["answers"] = answers
+
+
+def finish_exam():
+    selected_ids = session["exam_questions"]
+    answers = session.get("answers", {})
+    connection = get_db_connection()
+    try:
+        rows = connection.execute(
+            "SELECT id, correct_answer FROM questions WHERE id IN (" +
+            ",".join("?" for _ in selected_ids) + ")", selected_ids
+        ).fetchall()
+    finally:
+        connection.close()
+    score = sum(answers.get(str(row["id"])) == row["correct_answer"] for row in rows)
+    session["last_result"] = {"score": score, "total": len(selected_ids)}
+    for key in ("selected_course", "exam_size", "exam_questions", "current_question",
+                "answers", "exam_start_time", "exam_duration"):
+        session.pop(key, None)
+    return redirect(url_for("result"))
+
+
 @app.route("/save_answer", methods=["POST"])
 @active_exam_required
 def save_answer():
-
-    question_id = request.form.get("question_id")
-    answer = request.form.get("answer")
-
-    answers = session.get("answers", {})
-
-    answers[question_id] = answer
-
-    session["answers"] = answers
-
-    total_questions = len(session["exam_questions"])
-
+    if exam_expired():
+        return finish_exam()
+    record_current_answer()
     if session["current_question"] < len(session["exam_questions"]) - 1:
         session["current_question"] += 1
-
         return redirect(url_for("exam"))
+    return finish_exam()
 
-    return redirect(url_for("submit_exam"))
 
-@app.route("/submit_exam")
+@app.route("/submit_exam", methods=["POST"])
 @active_exam_required
 def submit_exam():
+    if not exam_expired():
+        record_current_answer()
+    return finish_exam()
 
-    answers = session.get("answers", {})
 
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    score = 0
-
-    for question_id, student_answer in answers.items():
-
-        cursor.execute("""
-        SELECT correct_answer
-        FROM questions
-        WHERE id = ?
-        """, (question_id,))
-
-        question = cursor.fetchone()
-
-        if question and student_answer == question["correct_answer"]:
-            score += 1
-
-    total_questions = len(session["exam_questions"])
-
-    connection.close()
-
-    return render_template(
-        "result.html",
-        score=score,
-        total=total_questions
-    )
-
+@app.route("/result")
+@student_required
+def result():
+    last_result = session.get("last_result")
+    if not last_result:
+        return redirect(url_for("dashboard"))
+    return render_template("result.html", **last_result)
 
 
 @app.route("/exam")
@@ -301,16 +312,10 @@ def exam():
 
     selected_ids = session["exam_questions"]
 
-    questions = [
-      q for q in all_questions
-      if q["id"] in selected_ids
-]
+    questions_by_id = {q["id"]: q for q in all_questions}
+    questions = [questions_by_id[qid] for qid in selected_ids if qid in questions_by_id]
 
     
-
-    if request.args.get("new") == "1":
-        session["current_question"] = 0
-        session["answers"] = {}
 
     if "current_question" not in session:
         session["current_question"] = 0
@@ -334,7 +339,7 @@ def exam():
     remaining_time = session["exam_duration"] - elapsed_time
 
     if remaining_time <= 0:
-       return redirect(url_for("submit_exam"))
+        return finish_exam()
     
     total = len(session["exam_questions"])
     question_ids = session["exam_questions"]
@@ -570,7 +575,7 @@ def edit_question(question_id):
         question=question
     )
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     flash("logout successful.")

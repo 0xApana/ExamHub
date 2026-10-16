@@ -30,10 +30,11 @@
                 Questions
             </a>
 
-            <a href="{{ url_for('logout') }}"
-               class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
-                Logout
-            </a>
+            <form method="POST" action="{{ url_for('logout') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button type="submit"
+               class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Logout</button>
+</form>
 
         </div>
 
